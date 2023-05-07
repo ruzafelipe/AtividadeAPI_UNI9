@@ -1,0 +1,233 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>TREINO DE API</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- mobile metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style_v2.css">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive_v2.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <!-- fevicon -->
+    <link rel="icon" href="images/computador.png" type="image/gif" />
+
+    <script src="script/jquery-2.1.1.min.js"></script>
+    <script src="script/jquery.blockUI.min.js"></script>
+    <script src="script/bootstrap-min.js"></script>
+    <script src="script/bootstrap-notify.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+            'use strict';
+            $(function () {
+                var token = JSON.parse(sessionStorage.getItem('token'))
+                var todoListItem = $('.todo-list');
+                var todoListInput = $('.todo-list-input');
+
+                $('.todo-list-att-btn').on("click", function (event) {
+                    event.preventDefault();
+                    let alvo = document.getElementById("alvo")
+                    alvo.innerText = ""
+                   
+                    $.ajax({
+                        headers: {
+                            authorization: token
+                        },
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        url: 'https://todolist-api.edsonmelo.com.br/api/task/search/',
+                        success: function (result) {
+                            if (result.length > 0) {
+                                for (let x = 0; x <= result.length; x++) {
+                                    todoListItem.append("<li id='"+result[x].name +"' value='" + result[x].id + "'><div value='" + result[x].name + "'class='form-check'><label class='form-check-label'><input id='"+result[x].id +"'' class='checkbox' type='checkbox'/>" + result[x].name + "<i class='input-helper'></i></label></div><i class='remove' > X </i> ");
+                                    if(result[x].realized > 0){            
+                                        var item1 = $('#'+result[x].id)                        
+                                        item1.attr('checked', 'checked');
+                                    }    
+
+                                }
+                            } else {
+                                alert("Nenhuma tarefa encontrada para esse usuário")
+                            }
+
+                        },
+                        error: function (result) {
+                            alert("Erro ao listar")
+                        }
+                    });
+                });
+
+                $('.todo-list-add-btn').on("click", function (event) {
+                    event.preventDefault();
+                    var item = $(this).prevAll('.todo-list-input').val();
+                    if (item) {
+                        let dados = {
+                            "name": item
+                        };
+                        $.ajax({
+                            headers: {
+                                authorization: token
+                            },
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(dados),
+                            url: 'https://todolist-api.edsonmelo.com.br/api/task/new/',
+                            success: function (result) {
+                                alert("Tarefa adicionada com sucesso, atualize para aparecer na lista")
+                            }
+                        });
+                        todoListInput.val("");
+                    }
+                });
+                todoListItem.on('change', '.checkbox', function () {
+                    let dados;
+                    let idTask = $(this).closest("li").val()
+                    let nameTask = $(this).closest("div").attr('value')
+                    if ($(this).attr('checked')) {
+                        let resultado = confirm("Deseja marcar a tarefa como aberta?")
+                        if (resultado == true) {
+                            $(this).removeAttr('checked');
+                            dados = {
+                                "id": idTask,
+                                "name": nameTask,
+                                "realized": 0
+                            }
+                            $.ajax({
+                                headers: {
+                                    authorization: token
+                                },
+                                type: "PUT",
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                data: JSON.stringify(dados),
+                                url: 'https://todolist-api.edsonmelo.com.br/api/task/update/',
+                                success: function (result) {                                    
+                                    alert("Tarefa atualizada com sucesso")                             
+                                }
+                            });
+                            
+                        }else{
+                            $(this).attr('checked', 'checked');
+                        }
+                    } else {
+                        let resultado2 = confirm("Deseja marcar a tarefa como finalizada?")
+                        if (resultado2 == true) {
+                            $(this).attr('checked', 'checked');
+                            dados = {
+                                "id": idTask,
+                                "name": nameTask,
+                                "realized": 1
+                            }
+                            $.ajax({
+                                headers: {
+                                    authorization: token
+                                },
+                                type: "PUT",
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                data: JSON.stringify(dados),
+                                url: 'https://todolist-api.edsonmelo.com.br/api/task/update/',
+                                success: function (result) {
+                                    alert("Tarefa atualizada com sucesso")
+
+                                }
+                            });
+                            
+                        }else{
+                            $(this).removeAttr('checked');
+                        }
+                    }
+                });
+
+                todoListItem.on('click', '.remove', function (event) {
+                    let resultado = confirm("Deseja realmente apagar a tarefa?")
+                    if (resultado == true) {
+                        let idTask = $(this).closest("li").val()
+                        let dados = {
+                            "id": idTask
+                        };
+                        $.ajax({
+                            headers: {
+                                authorization: token
+                            },
+                            type: "DELETE",
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(dados),
+                            url: 'https://todolist-api.edsonmelo.com.br/api/task/delete/',
+                            success: function (result) {
+                                alert("Tarefa excluída com sucesso");
+                            },
+                            error: function (result) {
+
+                            }
+                        });
+                        $(this).parent().remove();
+                    }
+                });
+            });
+        })(jQuery);
+    </script>
+</head>
+
+<body class="main-layout">
+    <header>
+        <div class="head_top">
+            <div class="header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                            <div class="full">
+                                <div class="center-desk">
+                                    <div class="logo">
+                                        <a href="index.html"><img src="images/logo.png" alt="#" width="200px"
+                                                height="100px" /></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="padding">
+                <div class="row container d-flex justify-content-center">
+                    <div class="col-md-12">
+                        <div class="card px-3">
+                            <div class="card-body">
+                                <h4 class="card-title">Minha lista de tarefas</h4>
+                                <div class="add-items d-flex"> <input type="text" class="form-control todo-list-input"
+                                        placeholder="Qual é a próxima tarefa? OBS: Atualize para listar as tarefas">
+                                    <button
+                                        class="add btn btn-primary font-weight-bold todo-list-add-btn">Adicionar</button>
+                                    <button
+                                        class="att btn btn-primary font-weight-bold todo-list-att-btn">Atualizar</button>
+                                </div>
+                                <div class="list-wrapper">
+                                    <ul class="d-flex flex-column-reverse todo-list" id="alvo">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </header>
+
+</body>
+
+</html>

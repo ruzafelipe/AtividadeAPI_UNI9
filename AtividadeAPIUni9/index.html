@@ -1,0 +1,381 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>TREINO DE API</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- mobile metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style_v2.css">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive_v2.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <!-- fevicon -->
+    <link rel="icon" href="images/computador.png" type="image/gif" />
+
+    <script src="script/jquery-2.1.1.min.js"></script>
+    <script src="script/jquery.blockUI.min.js"></script>
+    <script src="script/bootstrap-min.js"></script>
+    <script src="script/bootstrap-notify.js"></script>
+    <script type="text/javascript">
+
+
+        function fazerLogin(loginUser, senhaUser) {
+            let dados = {
+                "username": loginUser,
+                "password": senhaUser
+            };
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(dados),
+                url: 'https://todolist-api.edsonmelo.com.br/api/user/login/',
+                success: function (result) {
+                    if (result.id != null) {
+                        $('#token').val(result.token)
+                        $('.text-bg').css("visibility", "hidden")
+                        $('.text-bg2').css("visibility", "visible")
+                    }else{
+                        alert('Login e/ou senha inválidos.');
+                    }
+                },
+                error: function (result) {
+                    
+                }
+            });
+        }
+
+        function fazerCadastro(nomeUser, emailUser, loginUser, senhaUser) {
+            let dados = {
+                "name": nomeUser,
+                "email": emailUser,
+                "username": loginUser,
+                "password": senhaUser
+            };
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(dados),
+                url: 'https://todolist-api.edsonmelo.com.br/api/user/new/',
+                success: function (result) {
+                    alert("Cadastro realizado com sucesso")
+                },
+                error: function (result) {
+                    alert('Ocorreu um problema, tente mais tarde.');
+                }
+            });
+        }
+
+        function alterarNomeEmail(nomeUser, emailUser, loginUser, senhaUser) {
+            let dados = {
+                "name": nomeUser,
+                "email": emailUser,
+                "username": loginUser,
+                "password": senhaUser,
+                "picture": ""
+            };
+            let autorizador = ($('#token').val());
+            $.ajax({
+                headers: {
+                    authorization: autorizador
+                },
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(dados),
+                url: 'https://todolist-api.edsonmelo.com.br/api/user/update/',
+                success: function (result) {
+                    alert('Usuário alterado com sucesso.');
+                },
+                error: function (result) {
+                    alert('Ocorreu um problema, tente mais tarde.');
+                }
+            });
+        }
+
+        function alterarLoginSenha(loginAntigo, senhaAntiga, loginNovo, senhaNova) {
+            let dados = {
+                "username": loginAntigo,
+                "password": senhaAntiga,
+                "new_username": loginNovo,
+                "new_password": senhaNova
+            };
+            let autorizador = ($('#token').val());
+            $.ajax({
+                headers: {
+                    authorization: autorizador
+                },
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(dados),
+                url: 'https://todolist-api.edsonmelo.com.br/api/user/updateuserpass/',
+                success: function (result) {
+                    alert('Usuário alterado com sucesso.');
+                },
+                error: function (result) {
+                    alert('Ocorreu um problema, tente mais tarde.');
+                }
+            });
+        }
+
+        function apagarConta(login, senha) {
+            let resultado = confirm("Deseja realmente excluir sua conta?")
+            if(resultado == true){ 
+            let dados = {
+                "username": login,
+                "password": senha
+            };
+            let autorizador = ($('#token').val());
+            $.ajax({
+                headers: {
+                    authorization: autorizador
+                },
+                type: "DELETE",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(dados),
+                url: 'https://todolist-api.edsonmelo.com.br/api/user/delete/',
+                success: function (result) {
+                    $('.text-bg').css("visibility", "visible")
+                    $('.text-bg2').css("visibility", "hidden")
+                    $('.text-bg3').css("visibility", "hidden")
+                    $('#token').val(null)
+                    alert('Usuário apagado com sucesso.');
+                },
+                error: function (result) {
+                    alert('Ocorreu um problema, tente mais tarde.');
+                }
+                
+            });
+        }else{
+            $('.text-bg2').css("visibility", "visible");
+        }
+    }
+        
+        
+
+        $(document).ready(function () {
+            $("#btnClickLogin").click(function () {
+                fazerLogin($('#loginUser').val(), $('#senhaUser').val());
+                $('#login-modal').modal('hide')
+            });
+        });
+
+        $(document).ready(function () {
+            $("#btnClickLogoff").click(function () {
+                $('.text-bg').css("visibility", "visible")
+                $('.text-bg2').css("visibility", "hidden")
+                $('.text-bg3').css("visibility", "hidden")
+                $('#token').val(null)
+
+            });
+        });
+
+        $(document).ready(function () {
+            $("#btnClickCadastro").click(function () {
+                fazerCadastro($('#nomeUser').val(), $('#emailUser').val(), $('#loginUserCad').val(), $('#senhaUserCad').val());
+                $('#cadastro-modal').modal('hide')
+            });
+        });       
+        $(document).ready(function () {
+            $("#btnClickConta").click(function () {
+                $('.text-bg').css("visibility", "hidden")
+                $('.text-bg2').css("visibility", "hidden")
+                $('.text-bg3').css("visibility", "visible")
+            });
+        });
+        $(document).ready(function () {
+            $("#btnClickAlterarNomeEmail").click(function () {
+                alterarNomeEmail($('#nomeUpdate1').val(), $('#emailUpdate1').val(), $('#loginUpdate1').val(), $('#senhaUpdate1').val());
+                $('#update1-modal').modal('hide')
+                $('.text-bg').css("visibility", "hidden")
+                $('.text-bg2').css("visibility", "visible")
+                $('.text-bg3').css("visibility", "hidden")
+
+            });
+        });
+        $(document).ready(function () {
+            $("#btnClickAlterarLoginSenha").click(function () {
+                alterarLoginSenha($('#loginAntigo2').val(), $('#senhaAntiga2').val(), $('#loginNovo2').val(), $('#senhaNova2').val());
+                $('#update2-modal').modal('hide')
+                $('.text-bg').css("visibility", "hidden")
+                $('.text-bg2').css("visibility", "visible")
+                $('.text-bg3').css("visibility", "hidden")
+
+            });
+        });
+        $(document).ready(function () {
+            $("#btnClickDelete").click(function () {                
+                apagarConta($('#loginUser').val(), $('#senhaUser').val());   
+            });
+        });
+
+
+        $(document).ready(function () {
+            $("#btnClickTarefas").click(function () {
+                var dados = JSON.stringify($('#token').val())
+                sessionStorage.setItem('token', dados)                              
+                window.location.href = "tasks.html"
+            });
+        });
+    </script>
+</head>
+
+<body class="main-layout">
+    <header>
+        <div class="head_top">
+            <div class="header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                            <div class="full">
+                                <div class="center-desk">
+                                    <div class="logo">
+                                        <a href="index.html"><img src="images/logo.png" alt="#" width="200px"
+                                                height="100px" /></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="banner_main">
+                <div class="container-fluid">
+                    <div class="row d_flex">
+                        <div class="col-md-6">
+                            <div class="text-bg">
+                                <h1>Treino para consumir API</h1>
+                                <p>Nesta página, estou consumindo a API to do list, feita pelo Professor Edson e
+                                    solicitado como atividade para nota.
+                                    Curso de SI - Uninove Barra funda
+                                </p>
+                                <a href="#" data-toggle="modal" data-target="#login-modal">Logar</a>
+                                <a href="#" data-toggle="modal" data-target="#cadastro-modal">Cadastro</a>
+                            </div>
+                            <div class="text-bg2" style="visibility: hidden;" id="text-bg2">
+                                <h3>O que deseja fazer? </h3>
+                                <input type="button" value="Conta" name="btnClickConta" id="btnClickConta">
+                                <br></br>
+                                <input type="button" value="Tarefas" name="btnClickTarefas" id="btnClickTarefas">
+                                <br></br>
+                                <input type="button" value="Sair" name="btnClickLogoff" id="btnClickLogoff">
+                                <br></br>
+                                <input type="text" id="token" class="token" disabled
+                                    style="visibility: hidden; width: 250px; ">
+                            </div>
+                            <div class="text-bg3" style="visibility: hidden;" id="text-bg3">
+                                <h3>O que deseja fazer? </h3>
+                                <input type="button" value="Alterar Nome/Email" data-toggle="modal"
+                                    data-target="#update1-modal">
+                                <!--<input type="button" value="Alterar Nome/Email" name="btnClickAlterarNomeEmail" id="btnClickAlterarNomeEmail"> -->
+                                <br></br>
+                                <input type="button" value="Alterar Login/Senha" data-toggle="modal"
+                                data-target="#update2-modal">
+                                <br></br>
+                                <input type="button" value="Apagar Conta" name="btnClickDelete" id="btnClickDelete">
+                                <br></br>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-img">
+                                <figure><img src="images/box_img.png" alt="#" /></figure>                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </header>
+
+    <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" style="display: none; ">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Logar</h1><br>
+                <form>
+                    <input type="text" required="required" name="loginUser" id="loginUser" placeholder="Usuario">
+                    <input type="password" required="required" name="senhaUser" id="senhaUser" placeholder="Senha">
+                    </br>
+                    </br>
+                    <input type="button" class="login loginmodal-submit" value="Login" name="btnClickLogin"
+                        style="width: 150px;" id="btnClickLogin">
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="cadastro-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" style="display: none; ">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Cadastre - se</h1><br>
+                <form>
+                    <input type="text" required="required" name="nomeUser" id="nomeUser" placeholder="Nome">
+                    <input type="text" required="required" name="emailUser" id="emailUser" placeholder="Email">
+                    <input type="text" required="required" name="loginUserCad" id="loginUserCad" placeholder="Usuário">
+                    <input type="password" required="required" name="senhaUserCad" id="senhaUserCad"
+                        placeholder="Senha">
+                    </br>
+                    </br>
+                    <input type="button" class="login loginmodal-submit" value="Cadastre-se" name="btnClickCadastro"
+                        style="width: 150px;" id="btnClickCadastro">
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="update1-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" style="display: none; ">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Alterar Nome/Email</h1><br>
+                <form>
+                    <input type="text" required="required" name="nomeUpdate1" id="nomeUpdate1" placeholder="Novo Nome ">
+                    <input type="text" required="required" name="emailUpdate1" id="emailUpdate1" placeholder="Novo Email">
+                    <input type="text" required="required" name="loginUpdate1" id="loginUpdate1" placeholder="Confirme Usuário">
+                    <input type="password" required="required" name="senhaUpdate1" id="senhaUpdate1"
+                        placeholder="Confirme Senha">
+                    </br>
+                    </br>
+                    <input type="button" class="login loginmodal-submit" value="Alterar dados"
+                        name="btnClickAlterarNomeEmail" style="width: 150px;" id="btnClickAlterarNomeEmail">
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="update2-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true" style="display: none; ">
+    <div class="modal-dialog">
+        <div class="loginmodal-container">
+            <h1>Alterar Usuario/Senha</h1><br>
+            <form>
+                <input type="text" required="required" name="loginAntigo2" id="loginAntigo2" placeholder="Usuario atual">
+                <input type="password" required="required" name="senhaAntiga2" id="senhaAntiga2" placeholder="Senha atual">
+                <input type="text" required="required" name="loginNovo2" id="loginNovo2" placeholder="Usuário novo">
+                <input type="password" required="required" name="senhaNova2" id="senhaNova2"
+                    placeholder="Senha nova">
+                </br>
+                </br>
+                <input type="button" class="login loginmodal-submit" value="Alterar dados"
+                    name="btnClickAlterarLoginSenha" style="width: 150px;" id="btnClickAlterarLoginSenha">
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
